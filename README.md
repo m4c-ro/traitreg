@@ -77,5 +77,6 @@ this behaviour may break in the future.
 
 ### Similar / Previous Work
 
+* <https://github.com/dtolnay/inventory>
 * <https://github.com/mmastrac/rust-ctor>
 * <https://github.com/DouglasDwyer/wings>

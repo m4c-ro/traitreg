@@ -81,6 +81,7 @@
 //!
 //! ### Similar / Previous Work
 //!
+//! * <https://github.com/dtolnay/inventory>
 //! * <https://github.com/mmastrac/rust-ctor>
 //! * <https://github.com/DouglasDwyer/wings>
 #![forbid(missing_docs)]
