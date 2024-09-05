@@ -5,7 +5,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 authors = ["Cameron Duff <cameron@m4c.ro>"]
 readme = "README.md"
@@ -44,7 +44,7 @@ keywords.workspace = true
 categories.workspace = true
 
 [dependencies]
-traitreg-macros = { path = "traitreg-macros", version = "0.1.0" }
+traitreg-macros = { path = "traitreg-macros", version = "0.2.0" }
 
 [dev-dependencies]
 trybuild = "^1.0"
