@@ -8,7 +8,14 @@ members = [
 [workspace.package]
 version = "0.1.0"
 edition = "2021"
+authors = ["Cameron Duff <cameron@m4c.ro>"]
 readme = "README.md"
+license = "MIT OR Apache-2.0"
+description = "Create a registry of implementations of a trait"
+homepage = "https://github.com/m4c-ro/traitreg"
+repository = "https://github.com/m4c-ro/traitreg"
+keywords = ["trait", "registry", "metaprogramming", "traitreg", "macros"]
+categories = ["rust-patterns"]
 
 [workspace.dependencies]
 quote = { version = "^1.0", default-features = false }
@@ -28,7 +35,14 @@ features = [
 name = "traitreg"
 edition.workspace = true
 version.workspace = true
+authors.workspace = true
 readme.workspace = true
+license.workspace = true
+description.workspace = true
+homepage.workspace = true
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
 
 [dependencies]
-traitreg-macros = { path = "traitreg-macros" }
+traitreg-macros = { path = "traitreg-macros", version = "0.1.0" }

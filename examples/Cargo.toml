@@ -2,7 +2,14 @@
 name = "examples"
 edition.workspace = true
 version.workspace = true
-readme.workspace = true
+authors.workspace = true
+license.workspace = true
+description.workspace = true
+homepage.workspace = true
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
+readme = "../README.md"
 
 [dependencies]
 traitreg = { path = "../" }
