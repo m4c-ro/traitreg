@@ -80,8 +80,8 @@ pub fn register(attr: proc_macro::TokenStream, item: proc_macro::TokenStream) ->
             const INSTANCIATE: fn() -> Option<Box<dyn #trait_path>> = || { #constructor_fn_call_str };
             const NAME: &'static str = #type_name;
             const PATH: &'static str = stringify!(#type_path);
-            const FILE: &'static str = std::file!() ;
-            const MODULE_PATH: &'static str = std::module_path!();
+            const FILE: &'static str = core::file!() ;
+            const MODULE_PATH: &'static str = core::module_path!();
             const TRAIT_NAME: &'static str = #trait_name;
         }
 

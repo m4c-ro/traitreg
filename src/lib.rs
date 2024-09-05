@@ -84,7 +84,6 @@
 //! * <https://github.com/mmastrac/rust-ctor>
 //! * <https://github.com/DouglasDwyer/wings>
 #![forbid(missing_docs)]
-
 // Refs:
 //
 // https://maskray.me/blog/2021-11-07-init-ctors-init-array
@@ -97,7 +96,6 @@
 //      - Return custom iter type for iter_constructors method
 //      - Use linker section priority to ensure trait_registry runs after register_impl
 //      - Remove unsafe & static mut for sync
-//      - no_std
 
 
 
@@ -131,7 +129,7 @@ pub fn __register_impl<Trait, Type: RegisteredImpl<Trait>>() {
     };
 
     let wrapper: RegisteredImplWrapper<Box<u32>> = unsafe {
-        std::mem::transmute(wrapper)
+        core::mem::transmute(wrapper)
     };
     
     unsafe {
@@ -144,7 +142,7 @@ pub fn __enumerate_impls<Trait>(trait_: &'static str) -> RegisteredImplIter<Trai
     RegisteredImplIter::<Trait> {
         inner: unsafe { __REGISTRY.iter() },
         trait_,
-        _t: std::marker::PhantomData::<Trait>
+        _t: core::marker::PhantomData::<Trait>
     }
 }
 
@@ -168,7 +166,7 @@ impl<Trait> TraitRegStorage<Trait> {
     }
 
     /// Iterate over registered implementations
-    pub fn iter(&self) -> std::slice::Iter<RegisteredImplWrapper<Trait>> {
+    pub fn iter(&self) -> core::slice::Iter<RegisteredImplWrapper<Trait>> {
         self.impls.iter()
     }
 }
@@ -222,8 +220,8 @@ impl<Trait> RegisteredImplWrapper<Trait> {
     }
 }
 
-impl<Trait> std::fmt::Debug for RegisteredImplWrapper<Trait> {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
+impl<Trait> core::fmt::Debug for RegisteredImplWrapper<Trait> {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::result::Result<(), core::fmt::Error> {
         f.debug_struct("RegisteredImpl")
             .field("Type Name", &self.name)
             .field("Type Path", &self.path)
@@ -239,9 +237,9 @@ impl<Trait> std::fmt::Debug for RegisteredImplWrapper<Trait> {
 
 #[doc(hidden)]
 pub struct RegisteredImplIter<Trait> {
-    inner: std::slice::Iter<'static, RegisteredImplWrapper<Box<u32>>>,
+    inner: core::slice::Iter<'static, RegisteredImplWrapper<Box<u32>>>,
     trait_: &'static str,
-    _t: std::marker::PhantomData<Trait>,
+    _t: core::marker::PhantomData<Trait>,
 }
 
 impl<Trait> Iterator for RegisteredImplIter<Trait> {
@@ -250,7 +248,7 @@ impl<Trait> Iterator for RegisteredImplIter<Trait> {
     fn next(&mut self) -> Option<Self::Item> {
         for item in self.inner.by_ref() {
             let item: Self::Item = unsafe {
-                std::mem::transmute((*item).clone())
+                core::mem::transmute((*item).clone())
             };
 
             if item.trait_name == self.trait_ {
