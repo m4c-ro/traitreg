@@ -44,3 +44,15 @@ impl MyTrait for MyStruct {
 
 #[traitreg::registry(MyTrait)]
 static MYTRAIT_REGISTRY: () = ();
+
+#[derive(Debug)]
+enum MyEnum {
+    MyEnumVariant
+}
+
+#[traitreg::register]
+impl MyTrait for MyEnum{
+    fn foo(&self) -> &'static str {
+        "BAZ"
+    }
+}

@@ -86,17 +86,16 @@ pub fn register(attr: proc_macro::TokenStream, item: proc_macro::TokenStream) ->
         }
 
         #[used]
-        #[cfg_attr(any(target_os = "linux", target_os = "android"), link_section = ".init_array")]
-        #[cfg_attr(target_os = "freebsd", link_section = ".init_array")]
-        #[cfg_attr(target_os = "netbsd", link_section = ".init_array")]
-        #[cfg_attr(target_os = "openbsd", link_section = ".init_array")]
-        #[cfg_attr(target_os = "dragonfly", link_section = ".init_array")]
-        #[cfg_attr(target_os = "illumos", link_section = ".init_array")]
-        #[cfg_attr(target_os = "haiku", link_section = ".init_array")]
+        #[cfg_attr(any(target_os = "linux", target_os = "android"), link_section = ".init_array.10000")]
+        #[cfg_attr(target_os = "freebsd", link_section = ".init_array.10000")]
+        #[cfg_attr(target_os = "netbsd", link_section = ".init_array.10000")]
+        #[cfg_attr(target_os = "openbsd", link_section = ".init_array.10000")]
+        #[cfg_attr(target_os = "dragonfly", link_section = ".init_array.10000")]
+        #[cfg_attr(target_os = "illumos", link_section = ".init_array.10000")]
+        #[cfg_attr(target_os = "haiku", link_section = ".init_array.10000")]
         #[cfg_attr(target_vendor = "apple", link_section = "__DATA,__mod_init_func")]
-        #[cfg_attr(windows, link_section = ".CRT$XCU")]
+        #[cfg_attr(windows, link_section = ".CRT$XCT")]
         static #register_static_ident: extern fn() = {
-            #[cfg_attr(any(target_os = "linux", target_os = "android"), link_section = ".text.startup")]
             extern fn #register_static_fn_ident() {
                 traitreg::__register_impl::<Box<dyn #trait_path>, #type_path>();
             }
@@ -155,17 +154,16 @@ pub fn registry(attr: proc_macro::TokenStream, item: proc_macro::TokenStream) ->
         }
 
         #[used]
-        #[cfg_attr(any(target_os = "linux", target_os = "android"), link_section = ".init_array")]
-        #[cfg_attr(target_os = "freebsd", link_section = ".init_array")]
-        #[cfg_attr(target_os = "netbsd", link_section = ".init_array")]
-        #[cfg_attr(target_os = "openbsd", link_section = ".init_array")]
-        #[cfg_attr(target_os = "dragonfly", link_section = ".init_array")]
-        #[cfg_attr(target_os = "illumos", link_section = ".init_array")]
-        #[cfg_attr(target_os = "haiku", link_section = ".init_array")]
+        #[cfg_attr(any(target_os = "linux", target_os = "android"), link_section = ".init_array.20000")]
+        #[cfg_attr(target_os = "freebsd", link_section = ".init_array.20000")]
+        #[cfg_attr(target_os = "netbsd", link_section = ".init_array.20000")]
+        #[cfg_attr(target_os = "openbsd", link_section = ".init_array.20000")]
+        #[cfg_attr(target_os = "dragonfly", link_section = ".init_array.20000")]
+        #[cfg_attr(target_os = "illumos", link_section = ".init_array.20000")]
+        #[cfg_attr(target_os = "haiku", link_section = ".init_array.20000")]
         #[cfg_attr(target_vendor = "apple", link_section = "__DATA,__mod_init_func")]
         #[cfg_attr(windows, link_section = ".CRT$XCU")]
         static #build_static_ident: extern fn() = {
-            #[cfg_attr(any(target_os = "linux", target_os = "android"), link_section = ".text.startup")]
             extern fn #build_static_fn_ident() {
                 let mut storage = traitreg::TraitRegStorage::<Box<dyn #trait_ident>>::new();
                 for registered_impl in traitreg::__enumerate_impls(#trait_name) {

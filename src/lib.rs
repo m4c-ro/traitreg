@@ -92,9 +92,9 @@
 // https://github.com/DouglasDwyer/wings/tree/master
 
 // TODO:
+//      - Initialization order is not guaranteed on apple platforms
 //      - Deconflict type/trait names (get full path?)
 //      - Return custom iter type for iter_constructors method
-//      - Use linker section priority to ensure trait_registry runs after register_impl
 //      - Remove unsafe & static mut for sync
 
 
