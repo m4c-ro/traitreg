@@ -1,0 +1,7 @@
+error: custom attribute panicked
+ --> tests/api_misuse/register_impl_for_reference.rs:9:1
+  |
+9 | #[traitreg::register]
+  | ^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: message: Cannot register implementation on a reference, expected a struct, enum, union or type alias.

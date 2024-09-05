@@ -1,0 +1,7 @@
+error: custom attribute panicked
+ --> tests/api_misuse/register_self_impl.rs:7:1
+  |
+7 | #[traitreg::register]
+  | ^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: message: Can only register an implementation of a trait, 'impl <Trait> for <Type>'.

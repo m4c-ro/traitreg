@@ -1,10 +1,14 @@
 #![allow(unused)]
-// If it compiles it _doesn't_ work
 fn main() {}
 
 
 
 trait MyTrait {}
 
+union MyUnion {
+    f: f32,
+    u: u32,
+}
+
 #[traitreg::register]
-impl MyTrait for ! {}
+impl MyTrait for MyUnion {}

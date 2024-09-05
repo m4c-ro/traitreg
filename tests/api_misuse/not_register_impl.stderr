@@ -1,0 +1,7 @@
+error: custom attribute panicked
+ --> tests/api_misuse/not_register_impl.rs:9:1
+  |
+9 | #[traitreg::register]
+  | ^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: message: Cannot register inverted impl trait: 'impl !Trait for Type'.

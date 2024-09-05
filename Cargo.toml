@@ -1,7 +1,6 @@
 [workspace]
 members = [
     ".",
-    "examples",
     "traitreg-macros",
 ]
 
@@ -46,3 +45,12 @@ categories.workspace = true
 
 [dependencies]
 traitreg-macros = { path = "traitreg-macros", version = "0.1.0" }
+
+[dev-dependencies]
+trybuild = "^1.0"
+
+[[example]]
+name = "simple"
+
+[[example]]
+name = "complete"

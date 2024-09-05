@@ -1,0 +1,8 @@
+error[E0599]: no function or associated item named `new` found for struct `MyStruct` in the current scope
+ --> tests/api_misuse/register_struct_with_missing_constructor.rs:9:22
+  |
+7 | struct MyStruct;
+  | --------------- function or associated item `new` not found for this struct
+8 |
+9 | #[traitreg::register(new)]
+  |                      ^^^ function or associated item not found in `MyStruct`

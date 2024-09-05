@@ -1,0 +1,7 @@
+error: custom attribute panicked
+ --> tests/api_misuse/register_impl_for_array.rs:7:1
+  |
+7 | #[traitreg::register]
+  | ^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: message: Cannot register implementation on an array, expected a struct, enum, union or type alias.

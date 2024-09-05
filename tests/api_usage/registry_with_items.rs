@@ -1,10 +1,5 @@
 #![allow(unused)]
-// If it compiles it works
-fn main() {
-    for registered in MYTRAIT_REGISTRY.iter() {
-        eprintln!("{:#?}", registered);
-    }
-}
+fn main() {}
 
 
 
