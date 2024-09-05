@@ -40,9 +40,6 @@ impl MyTrait for MyStruct {
     }
 }
 
-#[traitreg::registry(MyTrait)]
-static MYTRAIT_REGISTRY: () = ();
-
 #[derive(Debug)]
 enum MyEnum {
     #[allow(unused)]
@@ -55,3 +52,6 @@ impl MyTrait for MyEnum {
         "BAZ"
     }
 }
+
+#[traitreg::registry(MyTrait)]
+static MYTRAIT_REGISTRY: () = ();
