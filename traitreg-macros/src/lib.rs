@@ -1,15 +1,13 @@
 use quote::quote;
-use syn::Ident;
 use syn::parse::{Parse, ParseStream};
-
-
+use syn::Ident;
 
 /// Register an implementation of a trait on a concrete type.
 ///
 /// ```rust
 /// trait MyTrait {}
 /// struct MyType;
-/// 
+///
 /// #[traitreg::register]
 /// impl MyTrait for MyType {}
 /// ```
@@ -19,23 +17,26 @@ use syn::parse::{Parse, ParseStream};
 ///
 /// ```rust
 /// trait MyTrait {}
-/// 
+///
 /// #[derive(Default)]
 /// struct MyType;
-/// 
+///
 /// #[traitreg::register(default)]
 /// impl MyTrait for MyType {}
-/// 
+///
 /// struct MyOtherType;
 /// impl MyOtherType {
 ///     fn new() -> Self { Self }
 /// }
-/// 
+///
 /// #[traitreg::register(new)]
 /// impl MyTrait for MyOtherType {}
 /// ```
 #[proc_macro_attribute]
-pub fn register(attr: proc_macro::TokenStream, item: proc_macro::TokenStream) -> proc_macro::TokenStream {
+pub fn register(
+    attr: proc_macro::TokenStream,
+    item: proc_macro::TokenStream,
+) -> proc_macro::TokenStream {
     // Read custom / default constructor from attribute if it exists
     let constructor_fn = if attr.is_empty() {
         None
@@ -59,21 +60,32 @@ pub fn register(attr: proc_macro::TokenStream, item: proc_macro::TokenStream) ->
     let parsed_item = syn::parse_macro_input!(item as RegisterItem);
     let item_impl = parsed_item.item;
 
-    let (trait_not, trait_path, _) = item_impl.trait_
+    let (trait_not, trait_path, _) = item_impl
+        .trait_
         .expect("Can only register an implementation of a trait, 'impl <Trait> for <Type>'.");
-    assert!(trait_not.is_none(), "Cannot register inverted impl trait: 'impl !Trait for Type'.");
+    assert!(
+        trait_not.is_none(),
+        "Cannot register inverted impl trait: 'impl !Trait for Type'."
+    );
 
-    let trait_ident = trait_path.require_ident().expect("Expected trait in impl block to have an identifier.");
+    let trait_ident = trait_path
+        .require_ident()
+        .expect("Expected trait in impl block to have an identifier.");
     let trait_name = format!("{trait_ident}");
 
     let type_path = get_self_type_path(&item_impl.self_ty);
-    let type_ident = type_path.require_ident().expect("Expected type in impl block to have an identifier.");
+    let type_ident = type_path
+        .require_ident()
+        .expect("Expected type in impl block to have an identifier.");
     let type_name = format!("{type_ident}");
 
-    let register_static_ident = syn::parse_str::<syn::Ident>(format!("{}_{}__Register", type_ident, trait_ident).as_ref())
-        .expect("Unable to create identifier");
-    let register_static_fn_ident = syn::parse_str::<syn::Ident>(format!("{}_{}__RegisterFn", type_ident, trait_ident).as_ref())
-        .expect("Unable to create identifier");
+    let register_static_ident =
+        syn::parse_str::<syn::Ident>(format!("{}_{}__Register", type_ident, trait_ident).as_ref())
+            .expect("Unable to create identifier");
+    let register_static_fn_ident = syn::parse_str::<syn::Ident>(
+        format!("{}_{}__RegisterFn", type_ident, trait_ident).as_ref(),
+    )
+    .expect("Unable to create identifier");
 
     let mut result: proc_macro::TokenStream = quote! {
         impl traitreg::RegisteredImpl<Box<dyn #trait_path>> for #type_path {
@@ -108,18 +120,19 @@ pub fn register(attr: proc_macro::TokenStream, item: proc_macro::TokenStream) ->
     result
 }
 
-
-
 /// Create a registry of implementations of a trait
 ///
 /// ```rust
 /// trait MyTrait {}
-/// 
+///
 /// #[traitreg::registry(MyTrait)]
 /// static MYTRAIT_REGISTRY: () = ();
 /// ```
 #[proc_macro_attribute]
-pub fn registry(attr: proc_macro::TokenStream, item: proc_macro::TokenStream) -> proc_macro::TokenStream {
+pub fn registry(
+    attr: proc_macro::TokenStream,
+    item: proc_macro::TokenStream,
+) -> proc_macro::TokenStream {
     let registry_attr = syn::parse_macro_input!(attr as RegistryAttribute);
     let registry_item = syn::parse_macro_input!(item as RegistryItem);
 
@@ -130,12 +143,15 @@ pub fn registry(attr: proc_macro::TokenStream, item: proc_macro::TokenStream) ->
     let item_ident = item.ident;
     let storage_ident = syn::parse_str::<syn::Ident>(format!("{}__STORAGE", item_ident).as_ref())
         .expect("Unable to create identifier");
-    let wrapper_struct_ident = syn::parse_str::<syn::Ident>(format!("{}__TraitReg", item_ident).as_ref())
-        .expect("Unable to create identifier");
-    let build_static_ident = syn::parse_str::<syn::Ident>(format!("{}__Build", item_ident).as_ref())
-        .expect("Unable to create identifier");
-    let build_static_fn_ident = syn::parse_str::<syn::Ident>(format!("{}__BuildFn", item_ident).as_ref())
-        .expect("Unable to create identifier");
+    let wrapper_struct_ident =
+        syn::parse_str::<syn::Ident>(format!("{}__TraitReg", item_ident).as_ref())
+            .expect("Unable to create identifier");
+    let build_static_ident =
+        syn::parse_str::<syn::Ident>(format!("{}__Build", item_ident).as_ref())
+            .expect("Unable to create identifier");
+    let build_static_fn_ident =
+        syn::parse_str::<syn::Ident>(format!("{}__BuildFn", item_ident).as_ref())
+            .expect("Unable to create identifier");
 
     quote! {
         static mut #storage_ident: Option<traitreg::TraitRegStorage<Box<dyn #trait_ident>>> = None;
@@ -179,8 +195,6 @@ pub fn registry(attr: proc_macro::TokenStream, item: proc_macro::TokenStream) ->
     }.into()
 }
 
-
-
 #[derive(Debug)]
 struct RegisterAttribute {
     constructor_fn_ident: Ident,
@@ -194,8 +208,6 @@ impl Parse for RegisterAttribute {
     }
 }
 
-
-
 struct RegisterItem {
     item: syn::ItemImpl,
 }
@@ -207,8 +219,6 @@ impl Parse for RegisterItem {
         })
     }
 }
-
-
 
 #[derive(Debug)]
 struct RegistryAttribute {
@@ -223,8 +233,6 @@ impl Parse for RegistryAttribute {
     }
 }
 
-
-
 struct RegistryItem {
     item: syn::ItemStatic,
 }
@@ -236,8 +244,6 @@ impl Parse for RegistryItem {
         })
     }
 }
-
-
 
 fn get_self_type_path(self_ty: &syn::Type) -> &syn::Path {
     if let syn::Type::Path(type_path) = self_ty {
@@ -259,8 +265,11 @@ fn get_self_type_path(self_ty: &syn::Type) -> &syn::Path {
         syn::Type::TraitObject(_) => " trait object",
         syn::Type::Tuple(_) => " tuple",
         syn::Type::Verbatim(_) => "n unknown syntax",
-        _ => unreachable!()
+        _ => unreachable!(),
     };
 
-    panic!("Cannot register implementation on a{}, expected a struct, enum, union or type alias.", error_type);
+    panic!(
+        "Cannot register implementation on a{}, expected a struct, enum, union or type alias.",
+        error_type
+    );
 }

@@ -8,47 +8,47 @@
 //! * Any code which needs to do _something_ for a number of types
 //!
 //! ### API
-//! 
+//!
 //! Register a trait implementation
-//! 
+//!
 //! ```rust
 //! trait MyTrait {}
 //! struct MyType;
-//! 
+//!
 //! #[traitreg::register]
 //! impl MyTrait for MyType {}
 //! ```
-//! 
+//!
 //! Optionally: register with a constructor
-//! 
+//!
 //! ```rust
 //! trait MyTrait {}
-//! 
+//!
 //! #[derive(Default)]
 //! struct MyType;
-//! 
+//!
 //! #[traitreg::register(default)]
 //! impl MyTrait for MyType {}
-//! 
+//!
 //! struct MyOtherType;
 //! impl MyOtherType {
 //!     fn new() -> Self { Self }
 //! }
-//! 
+//!
 //! #[traitreg::register(new)]
 //! impl MyTrait for MyOtherType {}
 //! ```
-//! 
+//!
 //! Build a static registry of all registered trait implementations at compile-time.
-//! 
+//!
 //! ```rust
 //! # trait MyTrait {}
 //! #[traitreg::registry(MyTrait)]
 //! static MYTRAIT_REGISTRY: () = ();
 //! ```
-//! 
+//!
 //! Access registry contents. See [TraitRegStorage].
-//! 
+//!
 //! ```rust
 //! # trait MyTrait {}
 //! # #[traitreg::registry(MyTrait)]
@@ -57,7 +57,7 @@
 //! for reg in MYTRAIT_REGISTRY.iter() {
 //!     println!("{reg:#?}");
 //!
-//!     // Instanciate 
+//!     // Instanciate
 //!     let instance: Option<Box<dyn MyTrait>> = reg.instanciate();
 //! }
 //! ```
@@ -97,15 +97,9 @@
 //      - Return custom iter type for iter_constructors method
 //      - Remove unsafe & static mut for sync
 
-
-
 pub use traitreg_macros::{register, registry};
 
-
-
 static mut __REGISTRY: Vec<RegisteredImplWrapper<Box<u32>>> = vec![];
-
-
 
 #[doc(hidden)]
 pub trait RegisteredImpl<Trait> {
@@ -128,10 +122,11 @@ pub fn __register_impl<Trait, Type: RegisteredImpl<Trait>>() {
         trait_name: Type::TRAIT_NAME,
     };
 
-    let wrapper: RegisteredImplWrapper<Box<u32>> = unsafe {
-        core::mem::transmute(wrapper)
-    };
-    
+    // Safety: Access to this type would be UB, but we only access this value after transmuting it
+    // back to the original type. In the mean time storing a fn ptr with a different signature will
+    // not modify the memory layout of RegisteredImplWrapper, so it is safe to store in a Vec.
+    let wrapper: RegisteredImplWrapper<Box<u32>> = unsafe { core::mem::transmute(wrapper) };
+
     unsafe {
         __REGISTRY.push(wrapper);
     }
@@ -142,7 +137,7 @@ pub fn __enumerate_impls<Trait>(trait_: &'static str) -> RegisteredImplIter<Trai
     RegisteredImplIter::<Trait> {
         inner: unsafe { __REGISTRY.iter() },
         trait_,
-        _t: core::marker::PhantomData::<Trait>
+        _t: core::marker::PhantomData::<Trait>,
     }
 }
 
@@ -155,9 +150,7 @@ pub struct TraitRegStorage<Trait> {
 impl<Trait> TraitRegStorage<Trait> {
     #[doc(hidden)]
     pub fn new() -> Self {
-        Self {
-            impls: vec![]
-        }
+        Self { impls: vec![] }
     }
 
     #[doc(hidden)]
@@ -170,8 +163,6 @@ impl<Trait> TraitRegStorage<Trait> {
         self.impls.iter()
     }
 }
-
-
 
 /// Registered implementation
 #[derive(Clone)]
@@ -197,23 +188,23 @@ impl<Trait> RegisteredImplWrapper<Trait> {
     pub fn name(&self) -> &'static str {
         self.name
     }
-    
+
     /// The type path. This differs from name when the implementation block is in a different crate
     /// of module than the type itself. e.g. `MyType` vs `other::module::OtherType`.
     pub fn path(&self) -> &'static str {
         self.path
     }
-    
+
     /// The file containing the implementation of the trait
     pub fn file(&self) -> &'static str {
         self.file
     }
-    
+
     /// The module containing the implementation of the trait
     pub fn module_path(&self) -> &'static str {
         self.module_path
     }
-   
+
     /// The trait name
     pub fn trait_name(&self) -> &'static str {
         self.trait_name
@@ -233,8 +224,6 @@ impl<Trait> core::fmt::Debug for RegisteredImplWrapper<Trait> {
     }
 }
 
-
-
 #[doc(hidden)]
 pub struct RegisteredImplIter<Trait> {
     inner: core::slice::Iter<'static, RegisteredImplWrapper<Box<u32>>>,
@@ -247,13 +236,15 @@ impl<Trait> Iterator for RegisteredImplIter<Trait> {
 
     fn next(&mut self) -> Option<Self::Item> {
         for item in self.inner.by_ref() {
-            let item: Self::Item = unsafe {
-                core::mem::transmute((*item).clone())
-            };
-
-            if item.trait_name == self.trait_ {
-                return Some(item);
+            if item.trait_name != self.trait_ {
+                continue;
             }
+
+            // Safety: Since we check the trait name before transmuting back we cannot accidentally
+            // construct a trait object pointing to a different vtable in memory
+            let item: Self::Item = unsafe { core::mem::transmute((*item).clone()) };
+
+            return Some(item);
         }
 
         None

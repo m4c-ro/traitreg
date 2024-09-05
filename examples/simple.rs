@@ -4,8 +4,6 @@ fn main() {
     }
 }
 
-
-
 trait MyTrait {}
 
 struct MyStruct;

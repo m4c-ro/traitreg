@@ -20,8 +20,6 @@ fn main() {
     }
 }
 
-
-
 trait MyTrait: std::fmt::Debug {
     fn foo(&self) -> &'static str;
 }
@@ -47,11 +45,12 @@ static MYTRAIT_REGISTRY: () = ();
 
 #[derive(Debug)]
 enum MyEnum {
-    MyEnumVariant
+    #[allow(unused)]
+    MyEnumVariant,
 }
 
 #[traitreg::register]
-impl MyTrait for MyEnum{
+impl MyTrait for MyEnum {
     fn foo(&self) -> &'static str {
         "BAZ"
     }
