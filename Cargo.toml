@@ -1,0 +1,34 @@
+[workspace]
+members = [
+    ".",
+    "examples",
+    "traitreg-macros",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+readme = "README.md"
+
+[workspace.dependencies]
+quote = { version = "^1.0", default-features = false }
+proc-macro2 = { version = "^1.0", default-features = false }
+
+[workspace.dependencies.syn]
+version = "^2.0"
+default-features = false
+features = [
+    "parsing",
+    "proc-macro",
+    "printing",
+    "full",
+]
+
+[package]
+name = "traitreg"
+edition.workspace = true
+version.workspace = true
+readme.workspace = true
+
+[dependencies]
+traitreg-macros = { path = "traitreg-macros" }
