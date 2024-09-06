@@ -181,10 +181,7 @@ pub fn registry(
         #[cfg_attr(windows, link_section = ".CRT$XCU")]
         static #build_static_ident: extern fn() = {
             extern fn #build_static_fn_ident() {
-                let mut storage = traitreg::TraitRegStorage::<Box<dyn #trait_ident>>::new();
-                for registered_impl in traitreg::__enumerate_impls(#trait_name) {
-                    storage.__register_impl(registered_impl);
-                }
+                let storage = traitreg::TraitRegStorage::<Box<dyn #trait_ident>>::__new(#trait_name);
 
                 unsafe {
                     #storage_ident = Some(storage)

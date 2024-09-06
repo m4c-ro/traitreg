@@ -96,11 +96,11 @@
 //      - Initialization order is not guaranteed on apple platforms
 //      - Deconflict type/trait names (get full path?)
 //      - Return custom iter type for iter_constructors method
-//      - Remove unsafe & static mut for sync
 
 pub use traitreg_macros::{register, registry};
 
-static mut __REGISTRY: Vec<RegisteredImplWrapper<Box<u32>>> = vec![];
+static __REGISTRY: std::sync::Mutex<Vec<RegisteredImplWrapper<Box<u32>>>> =
+    std::sync::Mutex::new(vec![]);
 
 #[doc(hidden)]
 pub trait RegisteredImpl<Trait> {
@@ -128,35 +128,33 @@ pub fn __register_impl<Trait, Type: RegisteredImpl<Trait>>() {
     // not modify the memory layout of RegisteredImplWrapper, so it is safe to store in a Vec.
     let wrapper: RegisteredImplWrapper<Box<u32>> = unsafe { core::mem::transmute(wrapper) };
 
-    unsafe {
-        __REGISTRY.push(wrapper);
-    }
-}
-
-#[doc(hidden)]
-pub fn __enumerate_impls<Trait>(trait_: &'static str) -> RegisteredImplIter<Trait> {
-    RegisteredImplIter::<Trait> {
-        inner: unsafe { __REGISTRY.iter() },
-        trait_,
-        _t: core::marker::PhantomData::<Trait>,
-    }
+    let mut registry_ref = __REGISTRY.lock().expect("Traitreg internal mutex poisoned");
+    registry_ref.push(wrapper);
 }
 
 /// Trait registry storage. Contains methods to access the registry.
-#[derive(Default)]
 pub struct TraitRegStorage<Trait> {
     impls: Vec<RegisteredImplWrapper<Trait>>,
 }
 
 impl<Trait> TraitRegStorage<Trait> {
     #[doc(hidden)]
-    pub fn new() -> Self {
-        Self { impls: vec![] }
-    }
+    pub fn __new(trait_: &'static str) -> Self {
+        let registry_ref = __REGISTRY.lock().expect("Traitreg internal mutex poisoned");
 
-    #[doc(hidden)]
-    pub fn __register_impl(&mut self, type_: RegisteredImplWrapper<Trait>) {
-        self.impls.push(type_);
+        let impls = registry_ref
+            .iter()
+            .filter(|item| item.trait_name == trait_)
+            .cloned()
+            .map(|item| {
+                // Safety: Since we check the trait name before transmuting back we cannot accidentally
+                // construct a trait object pointing to a different vtable in memory
+                let item: RegisteredImplWrapper<Trait> = unsafe { core::mem::transmute(item) };
+                item
+            })
+            .collect();
+
+        Self { impls }
     }
 
     /// Iterate over registered implementations
@@ -222,32 +220,5 @@ impl<Trait> core::fmt::Debug for RegisteredImplWrapper<Trait> {
             .field("Module Path", &self.module_path)
             .field("File", &self.file)
             .finish()
-    }
-}
-
-#[doc(hidden)]
-pub struct RegisteredImplIter<Trait> {
-    inner: core::slice::Iter<'static, RegisteredImplWrapper<Box<u32>>>,
-    trait_: &'static str,
-    _t: core::marker::PhantomData<Trait>,
-}
-
-impl<Trait> Iterator for RegisteredImplIter<Trait> {
-    type Item = RegisteredImplWrapper<Trait>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        for item in self.inner.by_ref() {
-            if item.trait_name != self.trait_ {
-                continue;
-            }
-
-            // Safety: Since we check the trait name before transmuting back we cannot accidentally
-            // construct a trait object pointing to a different vtable in memory
-            let item: Self::Item = unsafe { core::mem::transmute((*item).clone()) };
-
-            return Some(item);
-        }
-
-        None
     }
 }
