@@ -95,11 +95,10 @@
 // TODO:
 //      - Initialization order is not guaranteed on apple platforms
 //      - Deconflict type/trait names (get full path?)
-//      - Return custom iter type for iter_constructors method
 
 pub use traitreg_macros::{register, registry};
 
-static __REGISTRY: std::sync::Mutex<Vec<RegisteredImplWrapper<Box<u32>>>> =
+static __TRAITREG_REGISTRY: std::sync::Mutex<Vec<RegisteredImplWrapper<Box<u32>>>> =
     std::sync::Mutex::new(vec![]);
 
 #[doc(hidden)]
@@ -128,7 +127,9 @@ pub fn __register_impl<Trait, Type: RegisteredImpl<Trait>>() {
     // not modify the memory layout of RegisteredImplWrapper, so it is safe to store in a Vec.
     let wrapper: RegisteredImplWrapper<Box<u32>> = unsafe { core::mem::transmute(wrapper) };
 
-    let mut registry_ref = __REGISTRY.lock().expect("Traitreg internal mutex poisoned");
+    let mut registry_ref = __TRAITREG_REGISTRY
+        .lock()
+        .expect("Traitreg internal mutex poisoned");
     registry_ref.push(wrapper);
 }
 
@@ -140,7 +141,9 @@ pub struct TraitRegStorage<Trait> {
 impl<Trait> TraitRegStorage<Trait> {
     #[doc(hidden)]
     pub fn __new(trait_: &'static str) -> Self {
-        let registry_ref = __REGISTRY.lock().expect("Traitreg internal mutex poisoned");
+        let registry_ref = __TRAITREG_REGISTRY
+            .lock()
+            .expect("Traitreg internal mutex poisoned");
 
         let impls = registry_ref
             .iter()
@@ -160,6 +163,11 @@ impl<Trait> TraitRegStorage<Trait> {
     /// Iterate over registered implementations
     pub fn iter(&self) -> core::slice::Iter<RegisteredImplWrapper<Trait>> {
         self.impls.iter()
+    }
+
+    /// Instanciate all registered implementations which have a constuctor
+    pub fn instanciate_all(&self) -> impl Iterator<Item = Trait> + '_ {
+        self.impls.iter().filter_map(|item| item.instanciate())
     }
 }
 

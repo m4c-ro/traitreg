@@ -13,10 +13,15 @@ fn main() {
         if let Some(instance) = registered.instanciate() {
             // Use Debug, a supertrait of 'MyTrait'
             println!("Instance: {instance:#?}");
-
-            // Call a trait method
-            println!("FOO: {}", instance.foo());
         }
+    }
+
+    // Create a new instance for every registered type with a constructor
+    let instances: Vec<Box<dyn MyTrait>> = MYTRAIT_REGISTRY.instanciate_all().collect();
+
+    for instance in instances.iter() {
+        // Call a trait method
+        println!("FOO: {}", instance.foo());
     }
 }
 
