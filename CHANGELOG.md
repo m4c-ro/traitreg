@@ -27,11 +27,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
--
+- Track whether or not a registered type has a constructor rather than calling the constructor to
+  find out inside the `RegisteredImplWrapper` `Debug` implementation
 
 ### Added
 
-- `instanciate_all` method on TraitRegStorage
+- `instanciate_all` method on `TraitRegStorage`
+- `has_constructor` method on `RegisteredImplWrapper`
 
 ### Changed
 

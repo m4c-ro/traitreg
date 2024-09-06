@@ -104,6 +104,7 @@ static __TRAITREG_REGISTRY: std::sync::Mutex<Vec<RegisteredImplWrapper<Box<u32>>
 #[doc(hidden)]
 pub trait RegisteredImpl<Trait> {
     const INSTANCIATE: fn() -> Option<Trait>;
+    const HAS_CONSTRUCTOR: bool;
     const NAME: &'static str;
     const PATH: &'static str;
     const FILE: &'static str;
@@ -115,6 +116,7 @@ pub trait RegisteredImpl<Trait> {
 pub fn __register_impl<Trait, Type: RegisteredImpl<Trait>>() {
     let wrapper = RegisteredImplWrapper::<Trait> {
         instanciate: Type::INSTANCIATE,
+        has_constructor: Type::HAS_CONSTRUCTOR,
         name: Type::NAME,
         path: Type::PATH,
         file: Type::FILE,
@@ -175,6 +177,7 @@ impl<Trait> TraitRegStorage<Trait> {
 #[derive(Clone)]
 pub struct RegisteredImplWrapper<Trait> {
     instanciate: fn() -> Option<Trait>,
+    has_constructor: bool,
     name: &'static str,
     path: &'static str,
     file: &'static str,
@@ -189,6 +192,11 @@ impl<Trait> RegisteredImplWrapper<Trait> {
     /// concrete type.
     pub fn instanciate(&self) -> Option<Trait> {
         (self.instanciate)()
+    }
+
+    /// Was this type registered with a constructor
+    pub fn has_constructor(&self) -> bool {
+        self.has_constructor
     }
 
     /// The type name
@@ -224,7 +232,7 @@ impl<Trait> core::fmt::Debug for RegisteredImplWrapper<Trait> {
             .field("Type Name", &self.name)
             .field("Type Path", &self.path)
             .field("Trait Name", &self.trait_name)
-            .field("Has Constructor", &(self.instanciate)().is_some())
+            .field("Has Constructor", &self.has_constructor)
             .field("Module Path", &self.module_path)
             .field("File", &self.file)
             .finish()

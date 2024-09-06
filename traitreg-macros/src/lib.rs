@@ -44,6 +44,9 @@ pub fn register(
         Some(syn::parse_macro_input!(attr as RegisterAttribute))
     };
 
+    let has_constructor = constructor_fn.is_some();
+    let has_constructor = quote! { #has_constructor };
+
     let constructor_fn_call_str = if let Some(cfn) = constructor_fn {
         let ident = cfn.constructor_fn_ident;
         quote! {
@@ -90,6 +93,7 @@ pub fn register(
     let mut result: proc_macro::TokenStream = quote! {
         impl traitreg::RegisteredImpl<Box<dyn #trait_path>> for #type_path {
             const INSTANCIATE: fn() -> Option<Box<dyn #trait_path>> = || { #constructor_fn_call_str };
+            const HAS_CONSTRUCTOR: bool = #has_constructor;
             const NAME: &'static str = #type_name;
             const PATH: &'static str = stringify!(#type_path);
             const FILE: &'static str = core::file!() ;
