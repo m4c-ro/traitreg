@@ -42,6 +42,7 @@ homepage.workspace = true
 repository.workspace = true
 keywords.workspace = true
 categories.workspace = true
+exclude = ["tests", "examples"]
 
 [dependencies]
 traitreg-macros = { path = "traitreg-macros", version = "0.2.0" }
