@@ -39,7 +39,7 @@ impl MyOtherType {
 impl MyTrait for MyOtherType {}
 ```
 
-Build a static registry of all registered trait implementations at compile-time.
+Build a static registry of all registered trait implementations.
 
 ```rust
 #[traitreg::registry(MyTrait)]
@@ -74,6 +74,13 @@ but as far as I am aware this is unsound. Each proc macro invocation currently r
 proc-macro executable in-memory without reloading it, so state _can_ be persisted in static
 memory, but storing state across several independent macro calls is not supported by rustc and
 this behaviour may break in the future.
+
+### Outstanding Issues
+
+* Initialization order is not guaranteed on apple platforms, registered types may be missing from
+  the registry.
+* Registered implementations for traits with the same name will conflict, even if those traits are
+  in seperate modules or crates.
 
 ### Similar / Previous Work
 

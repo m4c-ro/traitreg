@@ -39,7 +39,7 @@
 //! impl MyTrait for MyOtherType {}
 //! ```
 //!
-//! Build a static registry of all registered trait implementations at compile-time.
+//! Build a static registry of all registered trait implementations.
 //!
 //! ```rust
 //! # trait MyTrait {}
@@ -79,6 +79,13 @@
 //! memory, but storing state across several independent macro calls is not supported by rustc and
 //! this behaviour may break in the future.
 //!
+//! ### Outstanding Issues
+//!
+//! * Initialization order is not guaranteed on apple platforms, registered types may be missing from
+//!   the registry.
+//! * Registered implementations for traits with the same name will conflict, even if those traits are
+//!   in seperate modules or crates.
+//!
 //! ### Similar / Previous Work
 //!
 //! * <https://github.com/dtolnay/inventory>
@@ -91,10 +98,6 @@
 // https://github.com/mmastrac/rust-ctor
 // https://docs.rs/bevy_type_registry/0.3.0/bevy_type_registry/
 // https://github.com/DouglasDwyer/wings/tree/master
-
-// TODO:
-//      - Initialization order is not guaranteed on apple platforms
-//      - Deconflict type/trait names (get full path?)
 
 pub use traitreg_macros::{register, registry};
 
